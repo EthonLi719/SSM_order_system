@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lhf.dao.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.lhf.po.User">
+        <id property="id" column="id"/>
+        <result property="userNo" column="user_no"/>
+        <result property="username" column="username"/>
+        <result property="nickname" column="nickname"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="password" column="password"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.lhf.po.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (user_no, username, nickname, phone, email, password)
+        VALUES (#{userNo}, #{username}, #{nickname}, #{phone}, #{email}, #{password})
+    </insert>
+
+    <update id="update" parameterType="com.lhf.po.User">
+        UPDATE user
+        <set>
+            <if test="userNo != null">user_no = #{userNo},</if>
+            <if test="username != null">username = #{username},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="password != null">password = #{password},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM user WHERE id = #{id}
+    </delete>
+
+    <select id="findById" resultMap="UserResultMap">
+        SELECT * FROM user WHERE id = #{id}
+    </select>
+
+    <select id="findByUserNo" resultMap="UserResultMap">
+        SELECT * FROM user WHERE user_no = #{userNo}
+    </select>
+
+    <select id="findByUsername" resultMap="UserResultMap">
+        SELECT * FROM user WHERE username = #{username}
+    </select>
+
+    <select id="findAll" resultMap="UserResultMap">
+        SELECT * FROM user ORDER BY id
+    </select>
+
+    <select id="findByNicknameContaining" resultMap="UserResultMap">
+        SELECT * FROM user WHERE nickname LIKE CONCAT('%', #{nickname}, '%') ORDER BY id
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM user
+    </select>
+
+</mapper>

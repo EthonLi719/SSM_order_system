@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/src/main/java/com/lhf/dao/AdminMapper.xml" value="3120270a-575c-4ac1-b0ed-09316c18f76c" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/lhf/dao/OrderItemMapper.xml" value="3120270a-575c-4ac1-b0ed-09316c18f76c" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/lhf/dao/OrderMapper.xml" value="3120270a-575c-4ac1-b0ed-09316c18f76c" />
+    <file url="file://$PROJECT_DIR$/src/main/java/com/lhf/dao/UserMapper.xml" value="3120270a-575c-4ac1-b0ed-09316c18f76c" />
+  </component>
+</project>

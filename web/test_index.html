@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Index.jsp测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; background: #f9f9f9; }
+        .result { background: #fff; padding: 10px; margin: 10px 0; border: 1px solid #ccc; }
+        .success { background: #e6ffe6; border-color: #99cc99; }
+        .error { background: #ffe6e6; border-color: #ff9999; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Index.jsp 访问测试</h1>
+
+    <div class="test-section">
+        <h3>测试不同路径访问index.jsp</h3>
+        <button onclick="testRoot()">测试根路径 /</button>
+        <button onclick="testIndexJsp()">测试 /index.jsp</button>
+        <button onclick="testHome()">测试 /home</button>
+        <div id="results" class="result">点击按钮开始测试...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>直接链接测试</h3>
+        <button onclick="window.open('/', '_blank')">在新标签页打开根路径</button>
+        <button onclick="window.open('/index.jsp', '_blank')">在新标签页打开/index.jsp</button>
+        <button onclick="window.open('/home', '_blank')">在新标签页打开/home</button>
+    </div>
+
+    <div class="test-section">
+        <h3>诊断信息</h3>
+        <div id="diagnosis">
+            <p>测试完成后这里会显示诊断结果</p>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {};
+
+        async function testRoot() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '正在测试根路径...';
+
+            try {
+                const response = await fetch('/', {
+                    method: 'GET',
+                    redirect: 'manual' // 不自动跟随重定向
+                });
+
+                testResults.root = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    url: response.url,
+                    headers: Object.fromEntries(response.headers.entries())
+                };
+
+                resultsDiv.innerHTML = updateResults();
+
+            } catch (error) {
+                testResults.root = {
+                    error: error.message,
+                    status: 'ERROR'
+                };
+                resultsDiv.innerHTML = updateResults();
+            }
+        }
+
+        async function testIndexJsp() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '正在测试 /index.jsp...';
+
+            try {
+                const response = await fetch('/index.jsp');
+                const text = await response.text();
+
+                testResults.indexJsp = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    success: response.ok,
+                    contentType: response.headers.get('content-type'),
+                    contentLength: response.headers.get('content-length'),
+                    contentPreview: text.substring(0, 200)
+                };
+
+                resultsDiv.innerHTML = updateResults();
+
+            } catch (error) {
+                testResults.indexJsp = {
+                    error: error.message,
+                    status: 'ERROR'
+                };
+                resultsDiv.innerHTML = updateResults();
+            }
+        }
+
+        async function testHome() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '正在测试 /home...';
+
+            try {
+                const response = await fetch('/home');
+                const text = await response.text();
+
+                testResults.home = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    success: response.ok,
+                    contentType: response.headers.get('content-type'),
+                    contentPreview: text.substring(0, 200)
+                };
+
+                resultsDiv.innerHTML = updateResults();
+
+            } catch (error) {
+                testResults.home = {
+                    error: error.message,
+                    status: 'ERROR'
+                };
+                resultsDiv.innerHTML = updateResults();
+            }
+        }
+
+        function updateResults() {
+            let html = '<h3>测试结果:</h3>';
+
+            for (const [test, result] of Object.entries(testResults)) {
+                const testName = test === 'root' ? '根路径 /' :
+                               test === 'indexJsp' ? '/index.jsp' : '/home';
+
+                html += `<div class="result ${result.status === 'ERROR' ? 'error' : (result.success ? 'success' : '')}">`;
+                html += `<strong>${testName}:</strong><br>`;
+
+                if (result.error) {
+                    html += `错误: ${result.error}`;
+                } else {
+                    html += `状态码: ${result.status}<br>`;
+                    html += `状态: ${result.statusText}<br>`;
+                    if (result.contentType) html += `内容类型: ${result.contentType}<br>`;
+                    if (result.contentLength) html += `内容长度: ${result.contentLength}<br>`;
+                    if (result.contentPreview) html += `内容预览: ${result.contentPreview}...<br>`;
+                }
+                html += `</div>`;
+            }
+
+            updateDiagnosis();
+            return html;
+        }
+
+        function updateDiagnosis() {
+            const diagnosisDiv = document.getElementById('diagnosis');
+            let diagnosis = '<h3>诊断结果:</h3>';
+
+            const rootOk = testResults.root && testResults.root.status !== 'ERROR';
+            const indexJspOk = testResults.indexJsp && testResults.indexJsp.success;
+            const homeOk = testResults.home && testResults.home.success;
+
+            if (rootOk) {
+                diagnosis += '<p class="success">✅ 根路径访问正常</p>';
+            } else {
+                diagnosis += '<p class="error">❌ 根路径访问失败</p>';
+            }
+
+            if (indexJspOk) {
+                diagnosis += '<p class="success">✅ index.jsp直接访问正常</p>';
+            } else {
+                diagnosis += '<p class="error">❌ index.jsp直接访问失败</p>';
+            }
+
+            if (homeOk) {
+                diagnosis += '<p class="success">✅ /home路径访问正常</p>';
+            } else {
+                diagnosis += '<p class="error">❌ /home路径访问失败</p>';
+            }
+
+            diagnosis += '<h3>建议:</h3>';
+            if (indexJspOk && !rootOk) {
+                diagnosis += '<p>index.jsp存在但根路径有问题，检查HomeController或Spring MVC配置</p>';
+            } else if (!indexJspOk) {
+                diagnosis += '<p>index.jsp访问失败，检查文件是否存在或Tomcat部署问题</p>';
+            } else {
+                diagnosis += '<p>所有路径正常，可以正常使用系统</p>';
+            }
+
+            diagnosisDiv.innerHTML = diagnosis;
+        }
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Index.jsp测试页面加载完成');
+        });
+    </script>
+</body>
+</html>

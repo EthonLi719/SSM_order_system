@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>路由测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
+        .success { background: #e6ffe6; border-color: #99cc99; }
+        .error { background: #ffe6e6; border-color: #ff9999; }
+        button { padding: 10px 15px; margin: 5px; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>路由测试页面</h1>
+
+    <div class="test">
+        <h3>1. 测试DebugController基础功能</h3>
+        <button onclick="testDebugBasic()">测试 /debug/test</button>
+        <div id="debugBasic" class="result">等待测试...</div>
+    </div>
+
+    <div class="test">
+        <h3>2. 测试DebugController产品功能</h3>
+        <button onclick="testDebugProduct()">测试 /debug/product-test-simple</button>
+        <div id="debugProduct" class="result">等待测试...</div>
+    </div>
+
+    <div class="test">
+        <h3>3. 测试ProductController路由</h3>
+        <button onclick="testProductAPI()">测试 /product/api/list</button>
+        <div id="productAPI" class="result">等待测试...</div>
+    </div>
+
+    <div class="test">
+        <h3>4. 测试Product页面路由</h3>
+        <button onclick="testProductList()">测试 /product/list</button>
+        <div id="productList" class="result">等待测试...</div>
+    </div>
+
+    <div class="test">
+        <h3>5. 直接访问URL测试</h3>
+        <button onclick="window.open('/debug/test', '_blank')">在新标签页打开 /debug/test</button>
+        <button onclick="window.open('/debug/product-test-simple', '_blank')">在新标签页打开 /debug/product-test-simple</button>
+        <button onclick="window.open('/product/api/list', '_blank')">在新标签页打开 /product/api/list</button>
+    </div>
+
+    <script>
+        async function testDebugBasic() {
+            const resultDiv = document.getElementById('debugBasic');
+            resultDiv.innerHTML = '正在测试...';
+
+            try {
+                const response = await fetch('/debug/test');
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML =
+                        '<strong>✅ 成功</strong><br>' +
+                        '状态: ' + response.status + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML =
+                        '<strong>❌ 失败</strong><br>' +
+                        '状态: ' + response.status + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML =
+                    '<strong>❌ 网络错误</strong><br>' +
+                    '错误: ' + error.message;
+            }
+        }
+
+        async function testDebugProduct() {
+            const resultDiv = document.getElementById('debugProduct');
+            resultDiv.innerHTML = '正在测试...';
+
+            try {
+                const response = await fetch('/debug/product-test-simple');
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML =
+                        '<strong>✅ 成功</strong><br>' +
+                        '状态: ' + response.status + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML =
+                        '<strong>❌ 失败</strong><br>' +
+                        '状态: ' + response.status + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML =
+                    '<strong>❌ 网络错误</strong><br>' +
+                    '错误: ' + error.message;
+            }
+        }
+
+        async function testProductAPI() {
+            const resultDiv = document.getElementById('productAPI');
+            resultDiv.innerHTML = '正在测试...';
+
+            try {
+                const response = await fetch('/product/api/list');
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML =
+                        '<strong>✅ 成功</strong><br>' +
+                        '状态: ' + response.status + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML =
+                        '<strong>❌ 失败</strong><br>' +
+                        '状态: ' + response.status + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML =
+                    '<strong>❌ 网络错误</strong><br>' +
+                    '错误: ' + error.message;
+            }
+        }
+
+        async function testProductList() {
+            const resultDiv = document.getElementById('productList');
+            resultDiv.innerHTML = '正在测试...';
+
+            try {
+                const response = await fetch('/product/list');
+                const text = await response.text();
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML =
+                        '<strong>✅ 成功</strong><br>' +
+                        '状态: ' + response.status + '<br>' +
+                        '内容类型: ' + response.headers.get('content-type') + '<br>' +
+                        '<small>前100个字符: ' + text.substring(0, 100) + '...</small>';
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML =
+                        '<strong>❌ 失败</strong><br>' +
+                        '状态: ' + response.status + '<br>' +
+                        '错误: ' + text;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML =
+                    '<strong>❌ 网络错误</strong><br>' +
+                    '错误: ' + error.message;
+            }
+        }
+
+        // 页面加载时自动测试
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('路由测试页面加载完成');
+        });
+    </script>
+</body>
+</html>

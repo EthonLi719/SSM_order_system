@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>商品数据简单测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; background: #f9f9f9; }
+        .result { background: #fff; padding: 10px; margin: 10px 0; border: 1px solid #ccc; }
+        .error { background: #ffe6e6; border-color: #ff9999; color: #cc0000; }
+        .success { background: #e6ffe6; border-color: #99cc99; color: #006600; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>商品数据简单测试</h1>
+
+    <div class="section">
+        <h3>步骤1: 测试基础API</h3>
+        <button onclick="testAPI()">测试 /product/api/list</button>
+        <div id="apiResult" class="result">等待测试...</div>
+    </div>
+
+    <div class="section">
+        <h3>步骤2: 测试调试API</h3>
+        <button onclick="testDebug()">测试 /debug/products</button>
+        <div id="debugResult" class="result">等待测试...</div>
+    </div>
+
+    <div class="section">
+        <h3>步骤3: 测试数据库连接</h3>
+        <button onclick="testDB()">测试 /debug/product-test</button>
+        <div id="dbResult" class="result">等待测试...</div>
+    </div>
+
+    <div class="section">
+        <h3>诊断结果</h3>
+        <div id="diagnosis" class="result">
+            <p>完成以上测试后，这里会显示诊断结果</p>
+        </div>
+    </div>
+
+    <script>
+        let apiResult = null;
+        let debugResult = null;
+        let dbResult = null;
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '正在测试...';
+
+            try {
+                const response = await fetch('/product/api/list');
+                const data = await response.json();
+
+                apiResult = { success: response.ok, data: data, status: response.status };
+
+                if (response.ok && data.code === 200) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML =
+                        '<strong>✅ API测试成功</strong><br>' +
+                        '状态码: ' + response.status + '<br>' +
+                        '商品数量: ' + (data.data ? data.data.length : 0) + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML =
+                        '<strong>❌ API测试失败</strong><br>' +
+                        '状态码: ' + response.status + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (error) {
+                apiResult = { success: false, error: error.message };
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML =
+                    '<strong>❌ 网络错误</strong><br>' +
+                    '错误: ' + error.message;
+            }
+
+            updateDiagnosis();
+        }
+
+        async function testDebug() {
+            const resultDiv = document.getElementById('debugResult');
+            resultDiv.innerHTML = '正在测试...';
+
+            try {
+                const response = await fetch('/debug/products');
+                const data = await response.json();
+
+                debugResult = { success: response.ok, data: data, status: response.status };
+
+                if (response.ok && data.code === 200) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML =
+                        '<strong>✅ 调试API测试成功</strong><br>' +
+                        '状态码: ' + response.status + '<br>' +
+                        '商品数量: ' + (data.data ? data.data.length : 0) + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML =
+                        '<strong>❌ 调试API测试失败</strong><br>' +
+                        '状态码: ' + response.status + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (error) {
+                debugResult = { success: false, error: error.message };
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML =
+                    '<strong>❌ 网络错误</strong><br>' +
+                    '错误: ' + error.message;
+            }
+
+            updateDiagnosis();
+        }
+
+        async function testDB() {
+            const resultDiv = document.getElementById('dbResult');
+            resultDiv.innerHTML = '正在测试...';
+
+            try {
+                const response = await fetch('/debug/product-test');
+                const data = await response.json();
+
+                dbResult = { success: response.ok, data: data, status: response.status };
+
+                if (response.ok && data.code === 200) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML =
+                        '<strong>✅ 数据库连接测试成功</strong><br>' +
+                        '状态码: ' + response.status + '<br>' +
+                        '商品数量: ' + (data.productCount || 0) + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML =
+                        '<strong>❌ 数据库连接测试失败</strong><br>' +
+                        '状态码: ' + response.status + '<br>' +
+                        '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (error) {
+                dbResult = { success: false, error: error.message };
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML =
+                    '<strong>❌ 网络错误</strong><br>' +
+                    '错误: ' + error.message;
+            }
+
+            updateDiagnosis();
+        }
+
+        function updateDiagnosis() {
+            const diagnosisDiv = document.getElementById('diagnosis');
+
+            if (!apiResult && !debugResult && !dbResult) {
+                diagnosisDiv.innerHTML = '<p>请先完成测试</p>';
+                return;
+            }
+
+            let diagnosis = '<h3>诊断结果:</h3>';
+
+            // 分析API结果
+            if (apiResult) {
+                if (apiResult.success && apiResult.data.data && apiResult.data.data.length > 0) {
+                    diagnosis += '<p class="success">✅ 商品API正常，有数据返回</p>';
+                } else if (apiResult.success && apiResult.data.data && apiResult.data.data.length === 0) {
+                    diagnosis += '<p class="error">❌ API正常但没有商品数据，需要插入数据</p>';
+                } else {
+                    diagnosis += '<p class="error">❌ 商品API异常</p>';
+                }
+            }
+
+            // 分析调试结果
+            if (debugResult) {
+                if (debugResult.success && debugResult.data.data && debugResult.data.data.length > 0) {
+                    diagnosis += '<p class="success">✅ 调试API正常，有数据返回</p>';
+                } else {
+                    diagnosis += '<p class="error">❌ 调试API无数据返回</p>';
+                }
+            }
+
+            // 分析数据库结果
+            if (dbResult) {
+                if (dbResult.success && dbResult.data.productCount > 0) {
+                    diagnosis += '<p class="success">✅ 数据库连接正常，有商品数据</p>';
+                } else if (dbResult.success && dbResult.data.productCount === 0) {
+                    diagnosis += '<p class="error">❌ 数据库连接正常但没有商品数据</p>';
+                } else {
+                    diagnosis += '<p class="error">❌ 数据库连接失败</p>';
+                }
+            }
+
+            // 提供解决方案
+            diagnosis += '<h3>建议的解决方案:</h3>';
+
+            if ((apiResult && !apiResult.success) || (dbResult && !dbResult.success)) {
+                diagnosis += '<p><strong>1. 检查数据库配置</strong><br>';
+                diagnosis += '- 确认MySQL服务已启动<br>';
+                diagnosis += '- 检查 db.properties 文件中的数据库连接参数<br>';
+                diagnosis += '- 确认数据库 order_system 已创建</p>';
+            }
+
+            if ((apiResult && apiResult.success && (!apiResult.data.data || apiResult.data.data.length === 0)) ||
+                (dbResult && dbResult.success && dbResult.data.productCount === 0)) {
+                diagnosis += '<p><strong>2. 插入示例数据</strong><br>';
+                diagnosis += '- 执行 sample_data_queries.sql 文件<br>';
+                diagnosis += '- 或手动执行商品数据插入语句<br>';
+                diagnosis += '- 参考 DATABASE_SETUP_GUIDE.md 文件</p>';
+            }
+
+            if (apiResult && apiResult.success && debugResult && debugResult.success) {
+                diagnosis += '<p><strong>3. 重启应用</strong><br>';
+                diagnosis += '- 重启Tomcat服务器<br>';
+                diagnosis += '- 清除浏览器缓存<br>';
+                diagnosis += '- 重新访问商品页面</p>';
+            }
+
+            diagnosisDiv.innerHTML = diagnosis;
+        }
+
+        // 页面加载时自动测试
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，准备开始测试');
+        });
+    </script>
+</body>
+</html>

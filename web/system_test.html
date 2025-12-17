@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>系统整体联动性测试</title>
+    <script src="js/api-client.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem; border-radius: 8px; margin-bottom: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; background: #f9f9f9; border-radius: 8px; }
+        .result { background: #fff; padding: 10px; margin: 10px 0; border: 1px solid #ccc; white-space: pre-wrap; font-family: monospace; max-height: 300px; overflow-y: auto; }
+        .success { background: #e6ffe6; border-color: #99cc99; }
+        .error { background: #ffe6e6; border-color: #ff9999; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .summary { background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        .test-result { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
+        .test-pass { color: #28a745; }
+        .test-fail { color: #dc3545; }
+        .test-info { font-size: 0.9rem; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔧 电商管理系统 - 整体联动性测试</h1>
+        <p>测试所有组件的协作能力和数据流转</p>
+    </div>
+
+    <div class="summary" id="summary">
+        <h3>📊 测试概览</h3>
+        <div id="testOverview">
+            <p>点击"开始全面测试"按钮开始系统测试...</p>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="test-section">
+            <h2>🏗️ 基础架构测试</h2>
+            <button onclick="testBasicArchitecture()">测试基础架构</button>
+            <div id="archResults" class="result">等待测试...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>📦 商品系统测试</h2>
+            <button onclick="testProductSystem()">测试商品系统</button>
+            <div id="productResults" class="result">等待测试...</div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="test-section">
+            <h2>📋 订单系统测试</h2>
+            <button onclick="testOrderSystem()">测试订单系统</button>
+            <div id="orderResults" class="result">等待测试...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔗 跨系统集成测试</h2>
+            <button onclick="testIntegration()">测试系统集成</button>
+            <div id="integrationResults" class="result">等待测试...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🚀 性能和错误处理测试</h2>
+        <button onclick="testPerformance()">性能测试</button>
+        <button onclick="testErrorHandling()">错误处理测试</button>
+        <button onclick="testFullSystem()" class="btn-success">开始全面测试</button>
+        <div id="performanceResults" class="result">等待测试...</div>
+    </div>
+
+    <div class="test-section">
+        <h2>📈 实时状态监控</h2>
+        <div id="realTimeStatus" class="status">
+            <p>等待测试开始...</p>
+        </div>
+        <button onclick="clearStatus()">清除状态</button>
+    </div>
+
+    <script>
+        let testResults = {
+            architecture: {},
+            product: {},
+            order: {},
+            integration: {},
+            performance: {},
+            error: {}
+        };
+
+        let testStartTime = null;
+
+        // 基础架构测试
+        async function testBasicArchitecture() {
+            updateStatus('开始基础架构测试...', 'info');
+            const resultsDiv = document.getElementById('archResults');
+            resultsDiv.textContent = '正在测试基础架构...';
+
+            const tests = [
+                { name: 'API客户端加载', test: () => typeof apiClient !== 'undefined' },
+                { name: 'HTML页面加载', test: () => document.readyState === 'complete' },
+                { name: 'JavaScript支持', test: () => typeof Promise !== 'undefined' },
+                { name: 'Fetch API支持', test: () => typeof fetch !== 'undefined' }
+            ];
+
+            let results = [];
+            for (const test of tests) {
+                try {
+                    const result = test.test();
+                    results.push({ name: test.name, success: result, error: null });
+                } catch (error) {
+                    results.push({ name: test.name, success: false, error: error.message });
+                }
+            }
+
+            testResults.architecture = results;
+            displayTestResults('archResults', results, '基础架构测试');
+            updateStatus('基础架构测试完成', 'success');
+        }
+
+        // 商品系统测试
+        async function testProductSystem() {
+            updateStatus('开始商品系统测试...', 'info');
+            const resultsDiv = document.getElementById('productResults');
+            resultsDiv.textContent = '正在测试商品系统...';
+
+            const tests = [
+                {
+                    name: '商品API路径测试',
+                    test: async () => {
+                        const urls = ['/product/list', '/product/api/list', '/product/products'];
+                        const results = [];
+
+                        for (const url of urls) {
+                            try {
+                                const response = await apiClient.request(url);
+                                results.push({ url: url, success: response.code === 200 });
+                            } catch (error) {
+                                results.push({ url: url, success: false, error: error.message });
+                            }
+                        }
+                        return results;
+                    }
+                },
+                {
+                    name: '商品数据查询',
+                    test: async () => {
+                        const response = await apiClient.safeRequest(() => apiClient.getProducts());
+                        return response.code === 200 && response.data;
+                    }
+                },
+                {
+                    name: '商品分类查询',
+                    test: async () => {
+                        const response = await apiClient.safeRequest(() => apiClient.getProductsByCategory('电子产品'));
+                        return response.code === 200;
+                    }
+                }
+            ];
+
+            let results = [];
+            for (const test of tests) {
+                try {
+                    const result = await test.test();
+                    results.push({ name: test.name, success: true, result: result });
+                } catch (error) {
+                    results.push({ name: test.name, success: false, error: error.message });
+                }
+            }
+
+            testResults.product = results;
+            displayTestResults('productResults', results, '商品系统测试');
+            updateStatus('商品系统测试完成', 'success');
+        }
+
+        // 订单系统测试
+        async function testOrderSystem() {
+            updateStatus('开始订单系统测试...', 'info');
+            const resultsDiv = document.getElementById('orderResults');
+            resultsDiv.textContent = '正在测试订单系统...';
+
+            const tests = [
+                {
+                    name: '订单API路径测试',
+                    test: async () => {
+                        const urls = ['/order/list', '/order/api/list', '/order/orders'];
+                        const results = [];
+
+                        for (const url of urls) {
+                            try {
+                                const response = await apiClient.request(url);
+                                results.push({ url: url, success: response.code === 200 });
+                            } catch (error) {
+                                results.push({ url: url, success: false, error: error.message });
+                            }
+                        }
+                        return results;
+                    }
+                },
+                {
+                    name: '订单数据查询',
+                    test: async () => {
+                        const response = await apiClient.safeRequest(() => apiClient.getOrders());
+                        return response.code === 200 && response.data;
+                    }
+                },
+                {
+                    name: '订单状态查询',
+                    test: async () => {
+                        const response = await apiClient.safeRequest(() => apiClient.getOrdersByStatus('pending'));
+                        return response.code === 200;
+                    }
+                }
+            ];
+
+            let results = [];
+            for (const test of tests) {
+                try {
+                    const result = await test.test();
+                    results.push({ name: test.name, success: true, result: result });
+                } catch (error) {
+                    results.push({ name: test.name, success: false, error: error.message });
+                }
+            }
+
+            testResults.order = results;
+            displayTestResults('orderResults', results, '订单系统测试');
+            updateStatus('订单系统测试完成', 'success');
+        }
+
+        // 系统集成测试
+        async function testIntegration() {
+            updateStatus('开始系统集成测试...', 'info');
+            const resultsDiv = document.getElementById('integrationResults');
+            resultsDiv.textContent = '正在测试系统集成...';
+
+            const tests = [
+                {
+                    name: '商品-订单数据流转',
+                    test: async () => {
+                        // 先获取商品，然后创建订单的概念测试
+                        const products = await apiClient.safeRequest(() => apiClient.getProducts());
+                        const orders = await apiClient.safeRequest(() => apiClient.getOrders());
+
+                        return {
+                            productsAvailable: products.code === 200 && products.data && products.data.length > 0,
+                            ordersAvailable: orders.code === 200 && orders.data,
+                            dataIntegrity: products.code === 200 && orders.code === 200
+                        };
+                    }
+                },
+                {
+                    name: '多路径一致性',
+                    test: () => {
+                        const productPaths = ['/product/list', '/product/api/list'];
+                        const orderPaths = ['/order/list', '/order/api/list'];
+
+                        return {
+                            productConsistent: productPaths.length > 1,
+                            orderConsistent: orderPaths.length > 1,
+                            totalPaths: productPaths.length + orderPaths.length
+                        };
+                    }
+                }
+            ];
+
+            let results = [];
+            for (const test of tests) {
+                try {
+                    const result = await test.test();
+                    results.push({ name: test.name, success: true, result: result });
+                } catch (error) {
+                    results.push({ name: test.name, success: false, error: error.message });
+                }
+            }
+
+            testResults.integration = results;
+            displayTestResults('integrationResults', results, '系统集成测试');
+            updateStatus('系统集成测试完成', 'success');
+        }
+
+        // 性能测试
+        async function testPerformance() {
+            updateStatus('开始性能测试...', 'info');
+            const resultsDiv = document.getElementById('performanceResults');
+            resultsDiv.textContent = '正在进行性能测试...';
+
+            const startTime = performance.now();
+            const testCount = 10;
+            const results = [];
+
+            for (let i = 0; i < testCount; i++) {
+                const requestStart = performance.now();
+                try {
+                    const response = await apiClient.safeRequest(() => apiClient.getProducts());
+                    const requestEnd = performance.now();
+
+                    results.push({
+                        iteration: i + 1,
+                        success: response.code === 200,
+                        responseTime: requestEnd - requestStart,
+                        dataSize: response.data ? response.data.length : 0
+                    });
+                } catch (error) {
+                    results.push({
+                        iteration: i + 1,
+                        success: false,
+                        error: error.message,
+                        responseTime: 0
+                    });
+                }
+            }
+
+            const endTime = performance.now();
+            const totalTime = endTime - startTime;
+
+            const successCount = results.filter(r => r.success).length;
+            const avgResponseTime = results.reduce((sum, r) => sum + r.responseTime, 0) / results.length;
+            const maxResponseTime = Math.max(...results.map(r => r.responseTime));
+            const minResponseTime = Math.min(...results.map(r => r.responseTime));
+
+            testResults.performance = {
+                totalTime,
+                avgResponseTime,
+                maxResponseTime,
+                minResponseTime,
+                successRate: (successCount / testCount) * 100,
+                results
+            };
+
+            resultsDiv.innerHTML = `
+                <strong>性能测试结果:</strong><br>
+                总时间: ${totalTime.toFixed(2)}ms<br>
+                成功率: ${testResults.performance.successRate.toFixed(1)}%<br>
+                平均响应时间: ${avgResponseTime.toFixed(2)}ms<br>
+                最大响应时间: ${maxResponseTime.toFixed(2)}ms<br>
+                最小响应时间: ${minResponseTime.toFixed(2)}ms<br>
+                <details>
+                    <summary>详细结果</summary>
+                    <pre>${JSON.stringify(results, null, 2)}</pre>
+                </details>
+            `;
+
+            updateStatus('性能测试完成', 'success');
+        }
+
+        // 错误处理测试
+        async function testErrorHandling() {
+            updateStatus('开始错误处理测试...', 'info');
+            const resultsDiv = document.getElementById('performanceResults');
+
+            const errorTests = [
+                {
+                    name: '无效路径测试',
+                    test: async () => {
+                        try {
+                            await apiClient.request('/product/invalid/path');
+                            return false;
+                        } catch (error) {
+                            return true;
+                        }
+                    }
+                },
+                {
+                    name: '错误恢复测试',
+                    test: async () => {
+                        const response = await apiClient.safeRequest(
+                            () => apiClient.request('/product/nonexistent'),
+                            '预期错误'
+                        );
+                        return response.code === 500;
+                    }
+                }
+            ];
+
+            let errorResults = [];
+            for (const test of errorTests) {
+                try {
+                    const result = await test.test();
+                    errorResults.push({ name: test.name, success: result });
+                } catch (error) {
+                    errorResults.push({ name: test.name, success: false, error: error.message });
+                }
+            }
+
+            const allPassed = errorResults.every(r => r.success);
+            resultsDiv.innerHTML += `
+                <strong>错误处理测试结果:</strong><br>
+                状态: ${allPassed ? '✅ 通过' : '❌ 失败'}<br>
+                <pre>${JSON.stringify(errorResults, null, 2)}</pre>
+            `;
+
+            updateStatus('错误处理测试完成', allPassed ? 'success' : 'error');
+        }
+
+        // 全面系统测试
+        async function testFullSystem() {
+            updateStatus('开始全面系统测试...', 'info');
+            testStartTime = performance.now();
+
+            await testBasicArchitecture();
+            await testProductSystem();
+            await testOrderSystem();
+            await testIntegration();
+            await testPerformance();
+            await testErrorHandling();
+
+            const endTime = performance.now();
+            const totalTime = (endTime - testStartTime) / 1000;
+
+            // 生成最终报告
+            generateFinalReport(totalTime);
+            updateStatus('全面系统测试完成！', 'success');
+        }
+
+        // 生成最终报告
+        function generateFinalReport(totalTime) {
+            const summaryDiv = document.getElementById('testOverview');
+
+            const calculateSuccessRate = (results) => {
+                if (!results || results.length === 0) return 0;
+                const passed = results.filter(r => r.success).length;
+                return (passed / results.length * 100).toFixed(1);
+            };
+
+            const archSuccess = calculateSuccessRate(testResults.architecture);
+            const productSuccess = calculateSuccessRate(testResults.product);
+            const orderSuccess = calculateSuccessRate(testResults.order);
+            const integrationSuccess = calculateSuccessRate(testResults.integration);
+
+            summaryDiv.innerHTML = `
+                <div class="test-result">
+                    <span class="test-pass">✅ 基础架构: ${archSuccess}%</span>
+                    <span class="test-info">|</span>
+                    <span class="test-pass">📦 商品系统: ${productSuccess}%</span>
+                    <span class="test-info">|</span>
+                    <span class="test-pass">📋 订单系统: ${orderSuccess}%</span>
+                    <span class="test-info">|</span>
+                    <span class="test-pass">🔗 系统集成: ${integrationSuccess}%</span>
+                </div>
+                <div class="test-result">
+                    <strong>⏱️ 总测试时间:</strong> ${totalTime.toFixed(2)}秒
+                </div>
+                <div class="test-result">
+                    <strong>🎯 整体状态:</strong> ${
+                        archSuccess >= 75 && productSuccess >= 75 && orderSuccess >= 75 && integrationSuccess >= 75
+                        ? '<span class="test-pass">✅ 系统运行正常</span>'
+                        : '<span class="test-fail">❌ 需要进一步检查</span>'
+                    }
+                </div>
+                <div style="margin-top: 20px;">
+                    <button onclick="window.location.reload()" class="btn-danger">🔄 重新测试</button>
+                    <button onclick="window.open('/product/list_improved.jsp', '_blank')" class="btn-success">🛒️ 访问商品页面</button>
+                    <button onclick="window.open('/order/manage', '_blank')" class="btn-primary">📋 访问订单页面</button>
+                </div>
+            `;
+        }
+
+        // 显示测试结果
+        function displayTestResults(elementId, results, testName) {
+            const element = document.getElementById(elementId);
+            const successCount = results.filter(r => r.success).length;
+            const successRate = (successCount / results.length * 100).toFixed(1);
+            const status = successCount === results.length ? 'success' : 'error';
+
+            element.className = `result ${status}`;
+            element.innerHTML = `
+                <strong>${testName}:</strong><br>
+                成功率: ${successRate}% (${successCount}/${results.length})<br>
+                <details>
+                    <summary>详细信息</summary>
+                    <pre>${JSON.stringify(results, null, 2)}</pre>
+                </details>
+            `;
+        }
+
+        // 更新状态
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('realTimeStatus');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = `
+                <strong>${new Date().toLocaleTimeString()}</strong><br>
+                ${message}
+            `;
+        }
+
+        // 清除状态
+        function clearStatus() {
+            const statusDiv = document.getElementById('realTimeStatus');
+            statusDiv.innerHTML = '<p>状态已清除</p>';
+        }
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('系统测试页面加载完成');
+            updateStatus('系统测试页面已准备就绪', 'info');
+        });
+    </script>
+</body>
+</html>

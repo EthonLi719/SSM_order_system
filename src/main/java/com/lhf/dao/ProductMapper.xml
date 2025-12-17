@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lhf.dao.ProductMapper">
+
+    <resultMap id="ProductResultMap" type="com.lhf.po.Product">
+        <id property="id" column="id"/>
+        <result property="sku" column="sku"/>
+        <result property="name" column="name"/>
+        <result property="category" column="category"/>
+        <result property="price" column="price"/>
+        <result property="stock" column="stock"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.lhf.po.Product" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO product (sku, name, category, price, stock, description, created_at)
+        VALUES (#{sku}, #{name}, #{category}, #{price}, #{stock}, #{description}, #{createdAt})
+    </insert>
+
+    <update id="update" parameterType="com.lhf.po.Product">
+        UPDATE product
+        <set>
+            <if test="sku != null">sku = #{sku},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="description != null">description = #{description},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStock">
+        UPDATE product SET stock = stock - #{quantity} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM product WHERE id = #{id}
+    </delete>
+
+    <select id="findById" resultMap="ProductResultMap">
+        SELECT * FROM product WHERE id = #{id}
+    </select>
+
+    <select id="findBySku" resultMap="ProductResultMap">
+        SELECT * FROM product WHERE sku = #{sku}
+    </select>
+
+    <select id="findAll" resultMap="ProductResultMap">
+        SELECT * FROM product ORDER BY created_at DESC
+    </select>
+
+    <select id="findByCategory" resultMap="ProductResultMap">
+        SELECT * FROM product WHERE category = #{category} ORDER BY created_at DESC
+    </select>
+
+    <select id="findByNameContaining" resultMap="ProductResultMap">
+        SELECT * FROM product WHERE name LIKE CONCAT('%', #{name}, '%') ORDER BY created_at DESC
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM product
+    </select>
+
+</mapper>

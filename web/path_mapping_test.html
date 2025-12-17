@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>路径映射测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; background: #f9f9f9; }
+        .result { background: #fff; padding: 10px; margin: 10px 0; border: 1px solid #ccc; white-space: pre-wrap; font-family: monospace; max-height: 400px; overflow-y: auto; }
+        .success { background: #e6ffe6; border-color: #99cc99; }
+        .error { background: #ffe6e6; border-color: #ff9999; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .section-title { color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Product和OrderController路径映射测试</h1>
+
+    <div class="test-section">
+        <h2 class="section-title">ProductController 路径测试</h2>
+        <button onclick="testProductApiList()">测试 /product/api/list</button>
+        <button onclick="testProductList()">测试 /product/list</button>
+        <div id="productResults" class="result">点击按钮测试Product路径...</div>
+    </div>
+
+    <div class="test-section">
+        <h2 class="section-title">OrderController 路径测试</h2>
+        <button onclick="testOrderApiList()">测试 /order/api/list</button>
+        <button onclick="testOrderList()">测试 /order/list</button>
+        <div id="orderResults" class="result">点击按钮测试Order路径...</div>
+    </div>
+
+    <div class="test-section">
+        <h2 class="section-title">对比测试</h2>
+        <button onclick="testAllPaths()">同时测试所有路径</button>
+        <div id="comparisonResults" class="result">点击按钮进行对比测试...</div>
+    </div>
+
+    <div class="test-section">
+        <h2 class="section-title">测试结果分析</h2>
+        <div id="analysis">
+            <p>测试完成后这里会显示分析结果</p>
+        </div>
+    </div>
+
+    <script>
+        let testResults = {
+            product: {},
+            order: {}
+        };
+
+        async function testProductApiList() {
+            const resultDiv = document.getElementById('productResults');
+            resultDiv.textContent = '正在测试 /product/api/list...';
+
+            try {
+                const response = await axios.get('/product/api/list');
+                testResults.product.apiList = {
+                    success: true,
+                    status: response.status,
+                    data: response.data,
+                    count: response.data.count || 0
+                };
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✅ /product/api/list 成功\n\n' + JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                testResults.product.apiList = {
+                    success: false,
+                    error: error.message,
+                    status: error.response?.status || 'N/A'
+                };
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ /product/api/list 失败\n\n' + error.message;
+            }
+            updateAnalysis();
+        }
+
+        async function testProductList() {
+            const resultDiv = document.getElementById('productResults');
+            resultDiv.textContent = '正在测试 /product/list...';
+
+            try {
+                const response = await axios.get('/product/list');
+                testResults.product.list = {
+                    success: true,
+                    status: response.status,
+                    contentType: response.headers['content-type']
+                };
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✅ /product/list 成功\n\n状态: ' + response.status + '\n内容类型: ' + response.headers['content-type'];
+            } catch (error) {
+                testResults.product.list = {
+                    success: false,
+                    error: error.message,
+                    status: error.response?.status || 'N/A'
+                };
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ /product/list 失败\n\n' + error.message;
+            }
+            updateAnalysis();
+        }
+
+        async function testOrderApiList() {
+            const resultDiv = document.getElementById('orderResults');
+            resultDiv.textContent = '正在测试 /order/api/list...';
+
+            try {
+                const response = await axios.get('/order/api/list');
+                testResults.order.apiList = {
+                    success: true,
+                    status: response.status,
+                    data: response.data,
+                    count: response.data.count || 0
+                };
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✅ /order/api/list 成功\n\n' + JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                testResults.order.apiList = {
+                    success: false,
+                    error: error.message,
+                    status: error.response?.status || 'N/A'
+                };
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ /order/api/list 失败\n\n' + error.message;
+            }
+            updateAnalysis();
+        }
+
+        async function testOrderList() {
+            const resultDiv = document.getElementById('orderResults');
+            resultDiv.textContent = '正在测试 /order/list...';
+
+            try {
+                const response = await axios.get('/order/list');
+                testResults.order.list = {
+                    success: true,
+                    status: response.status,
+                    data: response.data,
+                    count: response.data.count || 0
+                };
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✅ /order/list 成功\n\n' + JSON.stringify(response.data, null, 2);
+            } catch (error) {
+                testResults.order.list = {
+                    success: false,
+                    error: error.message,
+                    status: error.response?.status || 'N/A'
+                };
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ /order/list 失败\n\n' + error.message;
+            }
+            updateAnalysis();
+        }
+
+        async function testAllPaths() {
+            const resultDiv = document.getElementById('comparisonResults');
+            resultDiv.textContent = '正在测试所有路径...';
+
+            const tests = [
+                { name: 'Product /api/list', url: '/product/api/list', controller: 'product', method: 'apiList' },
+                { name: 'Product /list', url: '/product/list', controller: 'product', method: 'list' },
+                { name: 'Order /api/list', url: '/order/api/list', controller: 'order', method: 'apiList' },
+                { name: 'Order /list', url: '/order/list', controller: 'order', method: 'list' }
+            ];
+
+            const results = [];
+
+            for (const test of tests) {
+                try {
+                    const response = await axios.get(test.url);
+                    results.push({
+                        ...test,
+                        success: true,
+                        status: response.status,
+                        count: response.data.count || 0
+                    });
+                } catch (error) {
+                    results.push({
+                        ...test,
+                        success: false,
+                        error: error.message,
+                        status: error.response?.status || 'N/A'
+                    });
+                }
+            }
+
+            resultDiv.className = 'result';
+            let output = '=== 路径映射对比测试结果 ===\n\n';
+
+            results.forEach(result => {
+                const status = result.success ? '✅' : '❌';
+                output += `${status} ${result.name}\n`;
+                output += `  状态码: ${result.status}\n`;
+                if (result.success) {
+                    output += `  返回数据量: ${result.count}\n`;
+                } else {
+                    output += `  错误: ${result.error}\n`;
+                }
+                output += '\n';
+            });
+
+            // 分析一致性
+            const productConsistent = (results.find(r => r.controller === 'product' && r.method === 'apiList')?.success ===
+                                       results.find(r => r.controller === 'product' && r.method === 'list')?.success);
+            const orderConsistent = (results.find(r => r.controller === 'order' && r.method === 'apiList')?.success ===
+                                     results.find(r => r.controller === 'order' && r.method === 'list')?.success);
+
+            output += '=== 一致性分析 ===\n\n';
+            output += `ProductController 路径一致性: ${productConsistent ? '✅ 一致' : '❌ 不一致'}\n`;
+            output += `OrderController 路径一致性: ${orderConsistent ? '✅ 一致' : '❌ 不一致'}\n\n`;
+
+            if (productConsistent && orderConsistent) {
+                output += '✅ 所有Controller的路径映射都工作正常！\n';
+            } else {
+                output += '⚠️  部分路径映射存在问题，需要检查配置\n';
+            }
+
+            resultDiv.textContent = output;
+        }
+
+        function updateAnalysis() {
+            const analysisDiv = document.getElementById('analysis');
+
+            const productApiOk = testResults.product.apiList?.success || false;
+            const productListOk = testResults.product.list?.success || false;
+            const orderApiOk = testResults.order.apiList?.success || false;
+            const orderListOk = testResults.order.list?.success || false;
+
+            let analysis = '<h3>路径映射分析:</h3>\n';
+
+            analysis += '<h4>ProductController:</h4>\n';
+            analysis += `<p>- /api/list: ${productApiOk ? '✅ 正常' : '❌ 失败'}</p>\n`;
+            analysis += `<p>- /list: ${productListOk ? '✅ 正常' : '❌ 失败'}</p>\n`;
+            analysis += `<p>- 路径一致性: ${productApiOk === productListOk ? '✅ 一致' : '❌ 不一致'}</p>\n`;
+
+            analysis += '<h4>OrderController:</h4>\n';
+            analysis += `<p>- /api/list: ${orderApiOk ? '✅ 正常' : '❌ 失败'}</p>\n`;
+            analysis += `<p>- /list: ${orderListOk ? '✅ 正常' : '❌ 失败'}</p>\n`;
+            analysis += `<p>- 路径一致性: ${orderApiOk === orderListOk ? '✅ 一致' : '❌ 不一致'}</p>\n`;
+
+            analysis += '<h4>总结:</h4>\n';
+            if ((productApiOk === productListOk) && (orderApiOk === orderListOk)) {
+                analysis += '<p style="color: green;">✅ 路径映射修改成功！所有路径都能正常访问。</p>\n';
+            } else {
+                analysis += '<p style="color: red;">❌ 路径映射存在问题，需要进一步检查。</p>\n';
+            }
+
+            if (productApiOk) {
+                analysis += `<p style="color: blue;">📊 Product API返回 ${testResults.product.apiList.count} 个商品</p>\n`;
+            }
+            if (orderApiOk) {
+                analysis += `<p style="color: blue;">📊 Order API返回 ${testResults.order.apiList.count} 个订单</p>\n`;
+            }
+
+            analysisDiv.innerHTML = analysis;
+        }
+
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('路径映射测试页面加载完成');
+        });
+    </script>
+</body>
+</html>

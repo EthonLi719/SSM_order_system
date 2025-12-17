@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>商品API调试</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; background: #f9f9f9; }
+        .result { background: #f0f0f0; padding: 10px; margin: 10px 0; white-space: pre-wrap; font-family: monospace; }
+        .error { background: #ffe6e6; padding: 10px; margin: 10px 0; color: red; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .status { padding: 5px 10px; margin: 5px; border-radius: 3px; }
+        .success { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>商品API调试页面</h1>
+
+    <div class="test-section">
+        <h3>基础API测试</h3>
+        <button onclick="testProductList()">测试商品列表API</button>
+        <button onclick="testDebugProducts()">测试调试商品API</button>
+        <button onclick="testStats()">测试统计API</button>
+        <div id="apiResult" class="result">点击按钮开始测试...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>数据库连接测试</h3>
+        <button onclick="testProductService()">测试商品服务</button>
+        <div id="dbResult" class="result">等待测试...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>实时状态</h3>
+        <div id="status">准备就绪</div>
+    </div>
+
+    <script>
+        async function updateStatus(message, isSuccess = null) {
+            const statusDiv = document.getElementById('status');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = isSuccess === true ? 'success' : (isSuccess === false ? 'fail' : '');
+            statusDiv.innerHTML = `<div class="status ${className}">[${timestamp}] ${message}</div>`;
+        }
+
+        async function testProductList() {
+            const resultDiv = document.getElementById('apiResult');
+            updateStatus('正在测试 /product/api/list...');
+
+            try {
+                console.log('发送请求到: /product/api/list');
+                const response = await axios.get('/product/api/list');
+
+                console.log('收到响应:', response);
+                resultDiv.className = 'result';
+                resultDiv.textContent = '✅ API响应成功\n\n' + JSON.stringify(response.data, null, 2);
+
+                if (response.data.code === 200 && response.data.data) {
+                    updateStatus(`成功加载 ${response.data.data.length} 个商品`, true);
+                    resultDiv.textContent += '\n\n📊 商品数量: ' + response.data.data.length;
+
+                    if (response.data.data.length > 0) {
+                        resultDiv.textContent += '\n📦 第一个商品:\n' + JSON.stringify(response.data.data[0], null, 2);
+                    }
+                } else {
+                    updateStatus('API返回数据格式异常', false);
+                }
+
+            } catch (error) {
+                console.error('API调用失败:', error);
+                updateStatus('API调用失败: ' + error.message, false);
+
+                resultDiv.className = 'error';
+                let errorMsg = '❌ 请求失败\n\n';
+                errorMsg += '错误: ' + error.toString() + '\n\n';
+
+                if (error.response) {
+                    errorMsg += '状态码: ' + error.response.status + '\n';
+                    errorMsg += '响应数据: ' + JSON.stringify(error.response.data, null, 2) + '\n';
+                    errorMsg += '响应头: ' + JSON.stringify(error.response.headers, null, 2) + '\n';
+                } else if (error.request) {
+                    errorMsg += '请求已发送但无响应\n';
+                    errorMsg += '请求URL: ' + error.config.url + '\n';
+                } else {
+                    errorMsg += '请求配置错误\n';
+                }
+
+                resultDiv.textContent = errorMsg;
+            }
+        }
+
+        async function testDebugProducts() {
+            const resultDiv = document.getElementById('apiResult');
+            updateStatus('正在测试 /debug/products...');
+
+            try {
+                const response = await axios.get('/debug/products');
+                console.log('调试API响应:', response);
+
+                resultDiv.className = 'result';
+                resultDiv.textContent = '✅ 调试API响应成功\n\n' + JSON.stringify(response.data, null, 2);
+
+                if (response.data.code === 200) {
+                    updateStatus(`调试API返回 ${response.data.data.length} 个商品`, true);
+                } else {
+                    updateStatus('调试API返回错误: ' + response.data.message, false);
+                }
+
+            } catch (error) {
+                console.error('调试API调用失败:', error);
+                updateStatus('调试API调用失败: ' + error.message, false);
+
+                resultDiv.className = 'error';
+                resultDiv.textContent = '❌ 调试API失败\n\n' + error.toString();
+            }
+        }
+
+        async function testStats() {
+            updateStatus('正在测试 /debug/stats...');
+
+            try {
+                const response = await axios.get('/debug/stats');
+                console.log('统计API响应:', response);
+
+                updateStatus('统计API调用成功', true);
+                document.getElementById('apiResult').textContent = '✅ 统计数据:\n\n' + JSON.stringify(response.data, null, 2);
+
+            } catch (error) {
+                console.error('统计API调用失败:', error);
+                updateStatus('统计API调用失败: ' + error.message, false);
+
+                document.getElementById('apiResult').className = 'error';
+                document.getElementById('apiResult').textContent = '❌ 统计API失败\n\n' + error.toString();
+            }
+        }
+
+        async function testProductService() {
+            const dbResult = document.getElementById('dbResult');
+            updateStatus('正在测试商品服务层...');
+
+            try {
+                const response = await axios.get('/debug/product-test');
+                console.log('商品服务测试响应:', response);
+
+                if (response.data.code === 200) {
+                    updateStatus('商品服务测试成功', true);
+                    dbResult.className = 'result';
+                    dbResult.textContent = '✅ 商品服务测试成功\n\n' +
+                        '商品数量: ' + response.data.productCount + '\n\n' +
+                        '服务详情:\n' + JSON.stringify(response.data, null, 2);
+                } else {
+                    updateStatus('商品服务测试失败: ' + response.data.message, false);
+                    dbResult.className = 'error';
+                    dbResult.textContent = '❌ 商品服务测试失败\n\n' +
+                        JSON.stringify(response.data, null, 2);
+                }
+
+            } catch (error) {
+                console.error('商品服务测试失败:', error);
+                updateStatus('商品服务测试失败: ' + error.message, false);
+
+                dbResult.className = 'error';
+                let errorMsg = '❌ 服务测试失败\n\n';
+                errorMsg += error.toString() + '\n\n';
+
+                if (error.response && error.response.data) {
+                    errorMsg += '详细错误:\n' + JSON.stringify(error.response.data, null, 2);
+                }
+
+                dbResult.textContent = errorMsg;
+            }
+        }
+
+        // 页面加载时自动测试
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus('页面加载完成，准备开始测试');
+            setTimeout(testProductList, 1000);
+        });
+    </script>
+</body>
+</html>

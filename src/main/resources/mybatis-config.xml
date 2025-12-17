@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<!-- xml配置文件，包含对MyBatis系统的核心配置 -->
+<configuration>
+    <!-- 别名定义 -->
+    <typeAliases>
+        <package name="com.lhf.po"/>
+    </typeAliases>
+</configuration>
+

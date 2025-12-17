@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lhf.dao.AdminMapper">
+
+    <resultMap id="AdminResultMap" type="com.lhf.po.Admin">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="name" column="name"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.lhf.po.Admin" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO admin (username, password, name)
+        VALUES (#{username}, #{password}, #{name})
+    </insert>
+
+    <update id="update" parameterType="com.lhf.po.Admin">
+        UPDATE admin
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="name != null">name = #{name},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM admin WHERE id = #{id}
+    </delete>
+
+    <select id="findById" resultMap="AdminResultMap">
+        SELECT * FROM admin WHERE id = #{id}
+    </select>
+
+    <select id="findByUsername" resultMap="AdminResultMap">
+        SELECT * FROM admin WHERE username = #{username}
+    </select>
+
+    <select id="findAll" resultMap="AdminResultMap">
+        SELECT * FROM admin ORDER BY id
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*) FROM admin
+    </select>
+
+</mapper>
